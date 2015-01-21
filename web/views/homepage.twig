@@ -1,0 +1,18 @@
+{% extends 'layout.twig' %}
+
+{% block content %}
+<div id="banner-wrapper">
+    <section id="banner">
+        <h2>{{ Welcome }}</h2>
+        <div class="login">
+            <p>sign in below</p>
+            {{error}}
+            <form action="{{ path('admin_login_check') }}" method="post">
+                <input type="text" placeholder="Username" name="_username" value="{{ last_username }}">
+                <input type="password" placeholder="Password" name="_password">
+                <input type="submit"  value="login">
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}
