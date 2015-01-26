@@ -3,26 +3,74 @@
 require_once __DIR__.'/../vendor/autoload.php';
 use Symfony\Component\HttpFoundation\Request;
 
+//Register the security service provider like this:
+use Silex\Provider;
+//events
+use SimpleUser\UserEvents;
 
 $app = new Silex\Application();
+ 
+//To configure the Silex security service to use the SimpleUser\UserManager as its user provider, add it to your security.firewalls configuration like this:
+$app->register(new Provider\SecurityServiceProvider());
 
+//Enable Doctrine something like this:
+$app->register(new Provider\DoctrineServiceProvider());
+ 
+$app['db.options'] = array(
+    'driver'   => 'pdo_mysql',
+    'host'     => 'localhost',
+    'dbname'   => 'MY_DBNAME',
+    'user'     => 'MY_DB_USER',
+    'password' => 'MY_DB_PASSWORD',
+);
 $app['debug'] = true;
 
-$app->register(new Silex\Provider\SecurityServiceProvider(), array(
-    'security.firewalls' => array(
-        'admin' => array(
-            'pattern' => '^/admin',
-            'http' => true,
-            'users' => array(
-                'admin' => array('ROLE_ADMIN', '5FZ2Z8QIkA7UTZ4BYkoC+GsReLf569mSKDsfods6LYQ8t+a8EW9oaircfMpmaLbPBh4FOBiiFyLfuZmTSUwzZg=='),
-            ),
-        ),
-    )
-));
 
 $app->register(new Silex\Provider\TwigServiceProvider(), [
     'twig.path' => __DIR__.'/views',
 ]);
+//To use SimpleUser’s built-in routes and controllers, first register these additional services:
+$app->register(new Provider\RememberMeServiceProvider());
+$app->register(new Provider\SessionServiceProvider());
+$app->register(new Provider\ServiceControllerServiceProvider());
+$app->register(new Provider\UrlGeneratorServiceProvider());
+
+$app->register(new Provider\SwiftmailerServiceProvider());
+
+//Then mount the SimpleUser routes and controllers like this:
+$userServiceProvider = new SimpleUser\UserServiceProvider();
+$app->register($userServiceProvider);
+ 
+// Mount SimpleUser routes.
+$app->mount('/user', $userServiceProvider);
+
+
+
+//Configure the firewall to use these routes for form-based authentication. (Replace “/user” with whatever mount point you used with mount() above).
+$app['security.firewalls'] = array(
+    'login' => array(
+        'pattern' => '^/user/login$',
+    ),
+    'admin' => array(
+        'pattern' => '^.*$',
+        'anonymous' => false,
+        'remember_me' => array(),
+        'form' => array(
+            'login_path' => '/user/login',
+            'check_path' => '/user/login_check',
+        ),
+        'logout' => array(
+            'logout_path' => '/user/logout',
+        ),
+        'users' => $app->share(function($app) { return $app['user.manager']; }),
+    ),
+);
+if ($app['user.manager']->findOneBy(array('email' => 'christinarossi22@gmail.com')) == false) {
+$user = $app['user.manager']->createUser('christinarossi22@gmail.com', 'password', 'christina rossi', array('ROLE_ADMIN'));
+$app['user.manager']->insert($user);
+}
+
+
 
 $app->get('/', function(Request $request)  use ( $app ) {
     $pageData = [
@@ -60,5 +108,6 @@ $app->post('/login', function () use ( $app ) {
     return $app->redirect('/');
 
 });
+
   
 $app->run();
