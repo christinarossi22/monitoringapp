@@ -18,7 +18,6 @@
         "symfony/monolog-bridge": "~2.3",
         "symfony/twig-bridge": "~2.3",
         "doctrine/dbal": ">=2.2.0,<2.4.0-dev",
-        "swiftmailer/swiftmailer": "5.*",
-        "jasongrimes/silex-simpleuser": "2.0.1"
+        "swiftmailer/swiftmailer": "5.*"
     }
 }
