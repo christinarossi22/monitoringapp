@@ -1,30 +1,26 @@
 <?php
 session_start();
-// configuration
-$dbhost 	= "localhost";
-$dbname		= "pdo_ret";
-$dbuser		= "root";
-$dbpass		= "";
+require_once('config.php');
  
 // database connection
 $conn = new PDO("mysql:host=$dbhost;dbname=$dbname",$dbuser,$dbpass);
  
 // new data
  
-$user = $_POST['uname'];
-$password = $_POST['pword'];
+$user = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+$password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
+$hash = md5($password); 
  
 // query
-$result = $conn->prepare("SELECT * FROM users WHERE username= :hjhjhjh AND password= :asas");
-$result->bindParam(':hjhjhjh', $user);
-$result->bindParam(':asas', $password);
-$result->execute();
-$rows = $result->fetch(PDO::FETCH_NUM);
+$statement = $conn->prepare("SELECT * FROM Users WHERE Email=:email AND password=:pass LIMIT 1");
+$statement->bindParam(':email', $user);
+$statement->bindParam(':pass', $hash);
+$statement->execute();
+$rows = $statement->rowCount();
 if($rows > 0) {
-header("location: home.php");
+    $_SESSION['user'] = $user;
+    header("location: dashboard.php");
 }
 else{
-	
+	header("location: index.php");
 }
- 
-?>

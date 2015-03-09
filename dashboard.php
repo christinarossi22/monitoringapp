@@ -1,5 +1,10 @@
 <?php
 
+session_start();
+if (!isset($_SESSION['user'])){
+    header("location:index.php");
+}
+
 # use config.php to open a database connection ( see API.php for reference )
 include_once 'config.php';
 
@@ -12,7 +17,7 @@ catch(PDOException $e) {
 }
 
 # query the database for the ten most recent message entries, ordered by timestamp
-$sql= 'SELECT *  FROM LogEntry ORDER BY DateCreated DESC LIMIT 10';
+$sql= 'SELECT * FROM LogEntry ORDER BY DateCreated DESC LIMIT 10';
 
 $STH = $DBH->query($sql);
 
@@ -29,11 +34,12 @@ while( $row = $STH->fetch() ) {
 # query the database for the top three most common message entries, ordered by number of entries
 
 $sql = <<<QUERY
+SELECT 
 Message, 
-COUNT(*) as messages_count
-FROM LogEntry
-GROUP BY Message
-ORDER BY messages_count DESC
+COUNT(*) as 'messages_count' 
+FROM LogEntry 
+GROUP BY Message 
+ORDER BY messages_count DESC 
 LIMIT 3
 QUERY;
 
@@ -44,14 +50,14 @@ $topMessages = [];
 while( $row = $STH->fetch() ) {
     $item = [];
     $item['Message'] = $row['Message'];
-    $item['messages_count'] = $row['Count'];
+    $item['Count'] = $row['messages_count'];
     $topMessages[] = $item;
 }    
 
 # display the results as tables on a page
 
 ?>
-
+<a href="logout.php">Log Out</a>
 <h2>Recent Messages</h2>
 
 <table>
@@ -84,4 +90,11 @@ foreach( $topMessages as $message ) {
 
 ?>
     </tbody>
-</table>
+</table
+
+
+
+
+
+
+
