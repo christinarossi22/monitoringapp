@@ -1,3 +1,9 @@
+<html>
+<head>
+</head>
+<body>
+
+
 <?php
 session_start();
 require_once('config.php');
@@ -24,3 +30,6 @@ if($rows > 0) {
 else{
 	header("location: index.php");
 }
+?>
+</body>
+</html>

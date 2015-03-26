@@ -95,6 +95,6 @@ foreach( $topMessages as $message ) {
 
 
 
-
+// ajax to constantly update
 
 
